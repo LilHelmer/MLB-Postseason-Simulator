@@ -6,7 +6,7 @@ The methodologies and assumptions of this project are based off [Rudelius, Thoma
 
 ## Modeling Framework
 
-**Plate appearance outcome and player stats**  
+**Plate Appearance Outcome and Player Stats**  
 
 Model input data was collected and calculated from BaseballReference.com. We used statistic from 2016 regular season to model batting and pitching performances for the starting lineups of each team in the postseason.  
 Each batters would have a multinomial distribution that consists of 5 events, *single, double, triple, home run and walk*, and each pitchers would have a multinomial distribution of these 5 events that are given away. Since the chance for a pitcher getting a double or triple in a matchup is out of pitcher's control and mostly depends on the speed of the batter or the defensive skill of the fielders, a conditioned probability of league average is baked in, for example, a probability of a pitcher getting a double is calculated as follow,
@@ -16,3 +16,5 @@ Each batters would have a multinomial distribution that consists of 5 events, *s
 After created models for each player, we then applied **Log5 Method**, a variant of Bayes' formula developed by James, Bill in *Baseball Abstract (1981)* to calculate the outcome distribution for each plate appearance, the formula is represented as follow (e.g. for single hit):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\large&space;P(1B)=&space;\frac{(P(1B)_{Batter}\cdot&space;P(1B)_{Pitcher})&space;/&space;P(1B)_{LgAvg}}{(P(1B)_{Batter}\cdot&space;P(1B)_{Pitcher})&space;/&space;P(1B)_{LgAvg}&plus;(1-P(1B)_{Batter})\cdot&space;(1-P(1B)_{Pitcher})&space;/&space;(1-P(1B)_{LgAvg})}" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\large&space;P(1B)=&space;\frac{(P(1B)_{Batter}\cdot&space;P(1B)_{Pitcher})&space;/&space;P(1B)_{LgAvg}}{(P(1B)_{Batter}\cdot&space;P(1B)_{Pitcher})&space;/&space;P(1B)_{LgAvg}&plus;(1-P(1B)_{Batter})\cdot&space;(1-P(1B)_{Pitcher})&space;/&space;(1-P(1B)_{LgAvg})}" title="\large P(1B)= \frac{(P(1B)_{Batter}\cdot P(1B)_{Pitcher}) / P(1B)_{LgAvg}}{(P(1B)_{Batter}\cdot P(1B)_{Pitcher}) / P(1B)_{LgAvg}+(1-P(1B)_{Batter})\cdot (1-P(1B)_{Pitcher}) / (1-P(1B)_{LgAvg})}" /></a>
+
+League average probability was calculated with American League stats only because National League lacks of designated hitter would cause average batting performance skewed.
