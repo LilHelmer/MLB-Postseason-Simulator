@@ -25,3 +25,14 @@ Each plate appearance now has an outcome of either *single, double, triple, home
 The batting order in each team was decided by the number of starts in the regular season, for example, the first lineup would be the player who had the most starts in the first lineup in the regular season.  
 Since pitcher's batting stats is quite limited and skewed, we used the average of ninth lineup in National League to replace the pitchers in National League.  
 The pitching rotation order is decided by the 4 most prolific starting pitchers plus one relief pitcher. Relief pitcher would take over every games since the 7th inning to the end. The stats of relief pitchers were averaged from the 5 most prolific relief pitchers of each team. 
+
+**Base Counter**
+
+To simplify the rule of how runners move on the bases when the batter hit in a given plate appearance, logic stated at below,
+ - *Single* or *Error*: every runners advance one base
+ - *Double*: every runners advance two bases
+ - *Triple*: every runners advance three based
+ - *Home run*: every runners return to home base
+ - *Walk*: runner is pushed to next base when previous base is occupied 
+
+Stolen base and sacrifice bunt are neglected from the model since it's very difficult to determine when a specific team would call the action.
