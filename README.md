@@ -5,7 +5,6 @@ This project simulates 2016 Major Baseball League postseason using Monte Carlo a
 The methodologies and assumptions of this project are based off [Rudelius, Thomas](https://econpapers.repec.org/article/bpjjqsprt/v_3a8_3ay_3a2012_3ai_3a1_3an_3a10.htm)'s research published on *Journal of Quantitative Analysis in Sports (2012)*
 
 ## Modeling Framework
-
 **Plate Appearance and Player Stats**  
 
 Model input data was collected and calculated from BaseballReference.com. We used statistic from 2016 regular season to model batting and pitching performances for the starting lineups of each team in the postseason.  
@@ -36,3 +35,32 @@ To simplify the rule of how runners move on the bases when the batter hit in a g
  - *Walk*: runner is pushed to next base when previous base is occupied 
 
 Stolen base and sacrifice bunt are neglected from the model since it's very difficult to determine when a specific team would call the action.
+
+## Simulation Results 
+Every series in 2016 postseason were simulated 200 times to obtain the winning probability for each team, division series is best of 5 while league series and world series are best of 7.  
+Below is the schedule of 2016 postseason. 
+
+|American League  |National League  |
+|--|--|
+|Rangers *vs* Blue Jays|Dodgers *vs* Nationals|
+|Indians *vs* Red Sox  |Giants *vs* Cubs|
+
+
+After simulated for 28 possible team matchups (6 possible matchups for each league and 16 possible matchups for world series), we were able to know the winning probabilities in each series for each team.  
+
+|AL teams  |P(Win LDS)|P(Win LCS)|P(Win WS)|
+|--|--|--|--|
+|Rangers  |0.47|0.151|0.042|
+|Blue Jays|0.53|0.212|0.083|
+|Indians  |0.36|0.188|0.064|
+|Red Sox  |0.64|0.449|0.245|
+
+|NL teams  |P(Win LDS)|P(Win LCS)|P(Win WS)|
+|--|--|--|--|
+|Dodgers  |0.42|0.186|0.091|
+|Nationals|0.58|0.268|0.145|
+|Giants   |0.25|0.093|0.038|
+|Cubs     |0.75|0.453|0.292|
+
+
+The probability of winning LCS for a particular team is calculated from the probability of that team winning LDS multiply by the probability of beating next possible opponent weighted by the probability of opponent winning LDS, for example, *P(Rangers wins LCS) = P(Rangers wins LDS) x [P(Indians wins LDS) x P(Rangers beats Indians) + P(Red Sox wins LDS) x P(Rangers beats Red Sox)]*. The probability for winning WS follows this logic.
