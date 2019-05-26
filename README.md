@@ -6,7 +6,7 @@ The methodologies and assumptions of this project are based off [Rudelius, Thoma
 
 ## Modeling Framework
 
-**Plate Appearance Outcome and Player Stats**  
+**Plate Appearance and Player Stats**  
 
 Model input data was collected and calculated from BaseballReference.com. We used statistic from 2016 regular season to model batting and pitching performances for the starting lineups of each team in the postseason.  
 Each batters would have a multinomial distribution that consists of 5 events, *single, double, triple, home run and walk*, and each pitchers would have a multinomial distribution of these 5 events that are given away. Since the chance for a pitcher getting a double or triple in a matchup is out of pitcher's control and mostly depends on the speed of the batter or the defensive skill of the fielders, a conditional probability of league average is baked in, for example, a probability of a pitcher getting a double is calculated as follow,
@@ -19,3 +19,9 @@ After created models for each player, we then applied **Log5 Method**, a variant
 
 League average probability was calculated with American League stats only because National League lacks of designated hitter would cause average batting performance skewed.  
 Each plate appearance now has an outcome of either *single, double, triple, home run, or walk*. But there is also a possibility of *error* occurred on the field. Since errors are hardly accountable for the pitcher or the batter's ability, we used conditional probability of an error given the batter doesn't hit or walk, as a constant, which was approximated by the number of errors divided by number of put-outs in the regular season.
+
+**Player Lineups**
+
+The batting order in each team was decided by the number of starts in the regular season, for example, the first lineup would be the player who had the most starts in the first lineup in the regular season.  
+Since pitcher's batting stats is quite limited and skewed, we used the average of ninth lineup in National League to replace the pitchers in National League.  
+The pitching rotation order is decided by the 4 most prolific starting pitchers plus one relief pitcher. Relief pitcher would take over every games since the 7th inning to the end. The stats of relief pitchers were averaged from the 5 most prolific relief pitchers of each team. 
