@@ -64,3 +64,20 @@ After simulated for 28 possible team matchups (6 possible matchups for each leag
 
 
 The probability of winning LCS for a particular team is calculated from the probability of that team winning LDS multiply by the probability of beating next possible opponent weighted by the probability of opponent winning LDS, for example, *P(Rangers wins LCS) = P(Rangers wins LDS) x [P(Indians wins LDS) x P(Rangers beats Indians) + P(Red Sox wins LDS) x P(Rangers beats Red Sox)]*. The probability for winning WS follows this logic.
+
+## Conclusion
+Let's look back the question we would like to answer at the beginning of the project, the team with the most wins in regular season has the highest probability to win the world series title?  
+From our simulation result Cubs has the highest rate of 29.2% to win the world series. In reality Cubs did win the 2016 world championship and also won the most games in the regular season (table at below). Seems regular season stats pretty much told the fates? But when we look closer at who wins the American LCS from the simulation result, we see Red Sox has the highest winning rate, who actually only won 93 games in regular season, behind Rangers and Indians. Even though Rangers have second most wins in the all teams, they are predicted to lose to Blue Jays in the first round.    
+
+|Teams  |Wins  |
+|--|--|
+|Cubs     |103|  
+|Rangers  |95 |
+|Nationals|95 |
+|Indians  |94 |
+|Red Sox  |93 |
+|Dodgers  |91 |
+|Blue Jays|89 |
+|Giants   |87 |
+
+One fair explanation for this is the number of wins in the regular season of Rangers (95) is too close to Indians (94) and Res Sox (93), which gives some extent of uncertainty. In fact, Rangers's 47% LDS winning rate isn't even significant enough (based on 200 times simulation, one standard error equals to 3.5%), not to mention errors are compound in the next series.   
