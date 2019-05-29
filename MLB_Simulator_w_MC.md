@@ -1,4 +1,4 @@
-MLB\_Simulator\_with\_MC
+MLB Simulator with Monte Carlo
 ================
 
 ``` r
@@ -7,12 +7,6 @@ library(readxl)
 
 ## batters stats for each team are collected into different sheets in the same file, the ninth batter in NL is replaced by the league average ("nlninth" sheet)
 rangers.bat <- read_excel("Batter_stats.xlsx", sheet = "rangers")
-```
-
-    ## Warning in strptime(x, format, tz = tz): unknown timezone 'zone/tz/2019a.
-    ## 1.0/zoneinfo/Asia/Bangkok'
-
-``` r
 rangers.bat
 ```
 
@@ -79,12 +73,12 @@ triple <- 873/(8254+873)
 
 ## create function to transform original dataframe of Batter_stats into multinominal probability model for each players
 bat_trans <- function(x) {
-    x$`1B` <- x$H - x$`2B` - x$`3B` - x$HR
-    P.1B <- x$`1B`/x$PA
-    P.2B <- x$`2B`/x$PA
-    P.3B <- x$`3B`/x$PA
-    P.HR <- x$HR/x$PA  
-    P.BB <- x$BB/x$PA
+    x[["1B"]] <- x[["H"]] - x[["2B"]] - x[["3B"]] - x[["HR"]]
+    P.1B <- x[["1B"]]/x[["PA"]]
+    P.2B <- x[["2B"]]/x[["PA"]]
+    P.3B <- x[["3B"]]/x[["PA"]]
+    P.HR <- x[["HR"]]/x[["PA"]]  
+    P.BB <- x[["BB"]]/x[["PA"]]
     P.ER <- (1 - (P.1B + P.2B + P.3B + P.HR + P.BB)) * er
     x <- cbind(x[, c(1,3)], P.1B, P.2B, P.3B, P.HR, P.BB, P.ER)
     x <- as.data.frame(x)
@@ -92,12 +86,12 @@ bat_trans <- function(x) {
 
 ## create function to transform original dataframe of Batter_stats into multinominal probability model for each players
 pitch_trans <- function(x) {
-  x$`1B` <- x$H - x$`2B` - x$`3B` - x$HR
-  P.1B <- x$`1B`/x$PA
-  P.2B <- (x$`2B`+x$`3B`)/x$PA * double 
-  P.3B <- (x$`2B`+x$`3B`)/x$PA * triple
-  P.HR <- x$HR/x$PA  
-  P.BB <- x$BB/x$PA
+  x[["1B"]] <- x[["H"]] - x[["2B"]] - x[["3B"]] - x[["HR"]]
+  P.1B <- x[["1B"]]/x[["PA"]]
+  P.2B <- (x[["2B"]]+x[["3B"]])/x[["PA"]] * double 
+  P.3B <- (x[["2B"]]+x[["3B"]])/x[["PA"]] * triple
+  P.HR <- x[["HR"]]/x[["PA"]]  
+  P.BB <- x[["BB"]]/x[["PA"]]
   x <- cbind(x$rotation, P.1B, P.2B, P.3B, P.HR, P.BB)
   x <- rbind(x[c(1:4), ], apply(x[c(5:9), ], 2, mean))
   x <- as.data.frame(x)
@@ -149,9 +143,9 @@ rangers.pit
 ``` r
 ## league average stats are also needed in log5 method calculation, which was collected in Batter_stats 
 lgavg <- read_excel("Batter_stats.xlsx", sheet = "lgavg")
-lgavg <- data.frame(P.1B = (lgavg$H - lgavg$`2B` - lgavg$`3B` - lgavg$HR)/lgavg$PA, 
-                    P.2B = lgavg$`2B`/lgavg$PA, P.3B = lgavg$`3B`/lgavg$PA,
-                    P.HR = lgavg$HR/lgavg$PA, P.BB = lgavg$BB/lgavg$PA)
+lgavg <- data.frame(P.1B = (lgavg[["H"]] - lgavg[["2B"]] - lgavg[["3B"]] - lgavg[["HR"]])/lgavg[["PA"]], 
+                    P.2B = lgavg[["2B"]]/lgavg[["PA"]], P.3B = lgavg[["3B"]]/lgavg[["PA"]],
+                    P.HR = lgavg[["HR"]]/lgavg[["PA"]], P.BB = lgavg[["BB"]]/lgavg[["PA"]])
 ```
 
 ``` r
@@ -175,37 +169,36 @@ out <- 0
 inn <- 1
 pts <- numeric(9)
 
-batter_stats <- get(paste0(bat, ".bat"))
+batter_stats <- do.call("rbind", replicate(10, get(paste0(bat, ".bat")), simplify = FALSE))  ## assume each batter has maximum 10 plate appearances
 pitcher_stats <- get(paste0(pit, ".pit"))
 
-for(i in rep(c(1:9), 10)) {    ## assume each batter has maximum 10 plate appearances in a game
-  if (inn <= 7) {    ## in first 7 innings, batters would face starting pitcher   
-    P.1B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.1B")
-    P.2B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.2B")
-    P.3B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.3B")
-    P.HR <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.HR")
-    P.BB <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.BB")
-    P.ER <- (1 - (P.1B + P.2B + P.3B + P.HR + P.BB)) * er
-    P.OUT <- 1 - (P.1B + P.2B + P.3B + P.HR + P.BB + P.ER)
-  } else {
-    P.1B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.1B")
-    P.2B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.2B")
-    P.3B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.3B")
-    P.HR <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.HR")
-    P.BB <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.BB")
-    P.ER <- (1 - (P.1B + P.2B + P.3B + P.HR + P.BB)) * er
-    P.OUT <- 1 - (P.1B + P.2B + P.3B + P.HR + P.BB + P.ER)
-  }
-    outcome[i] <- sample(c("1B", "2B", "3B", "HR", "BB", "Out", "ER"), 1, prob = c(P.1B, P.2B, P.3B, P.HR, P.BB, P.OUT, P.ER))
-    inns[i] <- inn 
+for (i in 1:(9*10)) {    
+        if (inn <= 7) {    ## in first 7 innings, batters would face starting pitcher   
+          P.1B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.1B")
+          P.2B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.2B")
+          P.3B <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.3B")
+          P.HR <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.HR")
+          P.BB <- matchup(pitcher_stats[no, ], batter_stats[i, ], "P.BB")
+          P.ER <- (1 - (P.1B + P.2B + P.3B + P.HR + P.BB)) * er
+          P.OUT <- 1 - (P.1B + P.2B + P.3B + P.HR + P.BB + P.ER)
+        } else {
+          P.1B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.1B")
+          P.2B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.2B")
+          P.3B <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.3B")
+          P.HR <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.HR")
+          P.BB <- matchup(pitcher_stats[5, ], batter_stats[i, ], "P.BB")
+          P.ER <- (1 - (P.1B + P.2B + P.3B + P.HR + P.BB)) * er
+          P.OUT <- 1 - (P.1B + P.2B + P.3B + P.HR + P.BB + P.ER)
+        }
+          outcome[i] <- sample(c("1B", "2B", "3B", "HR", "BB", "Out", "ER"), 1, prob = c(P.1B, P.2B, P.3B, P.HR, P.BB, P.OUT, P.ER))
+          inns[i] <- inn 
     
-   if (outcome[i] == "Out") {out <- out + 1}
-   if (out == 3) {inn <- inn + 1; out <- 0}    ## proceed to next inning after 3 outs
-   if (inn == 10) {break}     ## game breaks after 9th innings (27 outs)
-}
- 
-outcome_inns <- rbind(outcome, inns) 
+          if (outcome[i] == "Out") {out <- out + 1}
+          if (out == 3) {inn <- inn + 1; out <- 0}    ## proceed to next inning after 3 outs
+          if (inn == 10) {break}     ## game breaks after 9th innings (27 outs)
+} 
 
+outcome_inns <- rbind(outcome, inns) 
 ## to count the score with base counter logic (in README.md)
 for (k in 1:9) {
   x <- outcome_inns[1, inns == k]
@@ -214,7 +207,7 @@ for (k in 1:9) {
   if (length(bases) == 0) {
     next
   } else {
-  for(j in 1:length(outcome_no)) {
+  for (j in 1:length(outcome_no)) {
       if (outcome_no[j] %in% c("1B", "ER")) {
         bases[1:j] <- bases[1:j] + 1
       } else if (outcome_no[j] == "2B") {
@@ -271,7 +264,7 @@ series_outcome <- function(team1, team2, games) {
 ```
 
 ``` r
-M <- 5  ## simulate 200 times for each series
+M <- 200  ## simulate 200 times for each series
 
 #########################    LDS (BO5)    ###############################
 rangers.bluejays <- character(M)
@@ -296,14 +289,14 @@ LDS
 ```
 
     ##        team prob.lds
-    ## 1   rangers      0.8
-    ## 2  bluejays      0.2
-    ## 3   indians      0.0
-    ## 4    redsox      1.0
-    ## 5   dodgers      0.6
-    ## 6 nationals      0.4
-    ## 7    giants      0.4
-    ## 8      cubs      0.6
+    ## 1   rangers    0.460
+    ## 2  bluejays    0.540
+    ## 3   indians    0.330
+    ## 4    redsox    0.670
+    ## 5   dodgers    0.375
+    ## 6 nationals    0.625
+    ## 7    giants    0.250
+    ## 8      cubs    0.750
 
 ``` r
 #########################    team matchups within each league (BO7)    ###############################
@@ -349,10 +342,10 @@ al_bo7
 ```
 
     ##   losing_team rangers bluejays indians redsox
-    ## 1     rangers      NA      0.2     0.4    0.0
-    ## 2    bluejays     0.8       NA     0.4    0.6
-    ## 3     indians     0.6      0.6      NA    0.6
-    ## 4      redsox     1.0      0.4     0.4     NA
+    ## 1     rangers      NA    0.625   0.495   0.80
+    ## 2    bluejays   0.375       NA   0.435   0.71
+    ## 3     indians   0.505    0.565      NA   0.76
+    ## 4      redsox   0.200    0.290   0.240     NA
 
 ``` r
 nl_bo7 <- data.frame(losing_team = c("dodgers", "nationals", "giants", "cubs"),
@@ -365,10 +358,10 @@ nl_bo7
 ```
 
     ##   losing_team dodgers nationals giants cubs
-    ## 1     dodgers      NA       0.4    0.4  0.6
-    ## 2   nationals     0.6        NA    0.2  0.4
-    ## 3      giants     0.6       0.8     NA  0.8
-    ## 4        cubs     0.4       0.6    0.2   NA
+    ## 1     dodgers      NA     0.485  0.430 0.54
+    ## 2   nationals   0.515        NA  0.365 0.69
+    ## 3      giants   0.570     0.635     NA 0.76
+    ## 4        cubs   0.460     0.310  0.240   NA
 
 ``` r
 #########################    team matchups between each league (BO7)    ###############################
@@ -418,10 +411,10 @@ all_bo7
 ```
 
     ##   losing_team rangers bluejays indians redsox
-    ## 1     dodgers     0.4      0.4     0.6    0.4
-    ## 2   nationals     0.6      0.0     0.6    1.0
-    ## 3      giants     0.8      0.2     0.0    0.4
-    ## 4        cubs     0.4      0.2     0.2    0.2
+    ## 1     dodgers   0.365    0.405   0.520  0.675
+    ## 2   nationals   0.315    0.420   0.340  0.610
+    ## 3      giants   0.430    0.570   0.580  0.815
+    ## 4        cubs   0.245    0.315   0.285  0.520
 
 ``` r
 prob.lcs = c(LDS$prob.lds[1] * (LDS$prob.lds[3]*al_bo7$rangers[3] + LDS$prob.lds[4]*al_bo7$rangers[4]),     ## rangers wins LCS
@@ -448,12 +441,12 @@ final_result <- cbind(LDS, prob.lcs, prob.ws)
 final_result
 ```
 
-    ##        team prob.lds prob.lcs  prob.ws
-    ## 1   rangers      0.8    0.800 0.404480
-    ## 2  bluejays      0.2    0.080 0.016256
-    ## 3   indians      0.0    0.000 0.000000
-    ## 4    redsox      1.0    0.120 0.060096
-    ## 5   dodgers      0.6    0.288 0.172800
-    ## 6 nationals      0.4    0.272 0.108800
-    ## 7    giants      0.4    0.128 0.037888
-    ## 8      cubs      0.6    0.312 0.199680
+    ##        team prob.lds   prob.lcs    prob.ws
+    ## 1   rangers    0.460 0.13829900 0.04177505
+    ## 2  bluejays    0.540 0.20560500 0.07853115
+    ## 3   indians    0.330 0.15265800 0.05650278
+    ## 4    redsox    0.670 0.50343800 0.30158965
+    ## 5   dodgers    0.375 0.18281250 0.08172597
+    ## 6 nationals    0.625 0.24453125 0.12497523
+    ## 7    giants    0.250 0.09734375 0.03158736
+    ## 8      cubs    0.750 0.47531250 0.28331281
